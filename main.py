@@ -5,7 +5,7 @@ from translators import translate_to_en,translate_to_indic
 from classifier import MobileNetV2Predictor                # crop disease classifier
 from rag import CropDiseaseRAG                         # RAG pipeline      
 from tts import ImprovedTTSProcessor,initialize_tts    # back-translation and TTS for hi
-
+from llm import call_llm
 
 MODEL_PATH = "models/best_finetuned_model.pth"  # Path to your fine-tuned model
 
@@ -87,7 +87,10 @@ def process():
     # ---------- RAG ----------
     rag_response_en = rag_system.search(query, top_k=3)
     print("4")
-    # print(rag_response_en)
+
+    llm_response = call_llm(rag_response_en[0],en_text)
+    print(llm_response)
+    print("#######################################################")
 
     # ---------- Translate response back to Hindi ----------
     rag_response_hi = translate_to_indic(rag_response_en[0]["treatment"],"hindi")
