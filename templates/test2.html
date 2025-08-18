@@ -23,7 +23,7 @@
             width: fit-content;
             box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
         }
-        #record-btn {
+        #record-btn, #play-response-btn { /* NEW */
             padding: 10px 20px;
             font-size: 16px;
             background-color: #2e7d32;
@@ -31,8 +31,9 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            margin-top: 10px;
         }
-        #record-btn:hover {
+        #record-btn:hover, #play-response-btn:hover { /* NEW */
             background-color: #1b5e20;
         }
         audio {
@@ -48,7 +49,7 @@
         }
         .chat-box {
             width: 300px;
-            height: 250px;
+            height: 300px; /* Increased height slightly */
             background: white;
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
@@ -88,12 +89,19 @@
         <div class="chat-box">
             <h3>💬 AgroBot Response</h3>
             <div id="response-text" class="response-text">Waiting for input...</div>
+
+            <!-- NEW Play Button -->
+            <button id="play-response-btn">🔊 Play AgroBot Response</button>
         </div>
 
-        <!-- Audio Record Section -->
+        <!-- Audio Record/Upload Section -->
         <div class="chat-box">
             <h3>🎙 Speak to AgroBot</h3>
+            <!-- Recording Option -->
             <button id="record-btn">🎙 Start Recording</button>
+            <br><br>
+            <!-- Upload Option -->
+            <input type="file" id="audio-upload" accept="audio/*">
             <br>
             <audio id="audio-playback" controls style="display:none;"></audio>
             <p id="stt-result" style="color:blue;"></p>
@@ -103,14 +111,15 @@
     <script>
         const backendURL = "http://127.0.0.1:5000"; // Flask backend
 
-        let selectedImage = null; // store image for process request
-        let recordedAudio = null; // store audio for process request
+        let selectedImage = null; 
+        let recordedAudio = null; 
+        let lastAudioUrl = null;  // NEW: store last generated bot audio
 
         // Image preview
         document.getElementById("image-upload").addEventListener("change", function(event) {
             const file = event.target.files[0];
             if (file) {
-                selectedImage = file; // keep for process
+                selectedImage = file;
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const preview = document.getElementById("preview");
@@ -121,7 +130,7 @@
             }
         });
 
-        // Audio recording
+        // ----------- Recording Logic ------------
         let mediaRecorder;
         let audioChunks = [];
         let isRecording = false;
@@ -143,13 +152,12 @@
 
                     mediaRecorder.addEventListener("stop", () => {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        recordedAudio = audioBlob; // keep for process
+                        recordedAudio = audioBlob;
                         const audioUrl = URL.createObjectURL(audioBlob);
 
                         audioPlayback.src = audioUrl;
                         audioPlayback.style.display = "block";
 
-                        // 🔥 Call main /process only if image is also uploaded
                         if (!selectedImage) {
                             alert("Please upload an image first!");
                             return;
@@ -165,9 +173,9 @@
                                 document.getElementById("stt-result").textContent = "Audio processed.";
                                 document.getElementById("response-text").textContent = data.rag_response_hi || "No response.";
                                 
-                                // Play TTS audio response
                                 if (data.audio_url) {
-                                    const botAudio = new Audio(`${backendURL}${data.audio_url}`);
+                                    lastAudioUrl = `${backendURL}${data.audio_url}`; // NEW
+                                    const botAudio = new Audio(lastAudioUrl);
                                     botAudio.play();
                                 }
                             })
@@ -178,6 +186,51 @@
                 mediaRecorder.stop();
                 isRecording = false;
                 recordBtn.textContent = "🎙 Start Recording";
+            }
+        });
+
+        // ----------- Upload Audio Logic ------------
+        document.getElementById("audio-upload").addEventListener("change", function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                recordedAudio = file;
+                const audioUrl = URL.createObjectURL(file);
+
+                audioPlayback.src = audioUrl;
+                audioPlayback.style.display = "block";
+
+                if (!selectedImage) {
+                    alert("Please upload an image first!");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("audio", recordedAudio);
+                formData.append("image", selectedImage);
+
+                fetch(`${backendURL}/process`, { method: "POST", body: formData })
+                    .then(res => res.json())
+                    .then(data => {
+                        document.getElementById("stt-result").textContent = "Uploaded audio processed.";
+                        document.getElementById("response-text").textContent = data.rag_response_hi || "No response.";
+
+                        if (data.audio_url) {
+                            lastAudioUrl = `${backendURL}${data.audio_url}`; // NEW
+                            const botAudio = new Audio(lastAudioUrl);
+                            botAudio.play();
+                        }
+                    })
+                    .catch(err => console.error("Process error:", err));
+            }
+        });
+
+        // ----------- NEW Play Button Logic ------------
+        document.getElementById("play-response-btn").addEventListener("click", function() {
+            if (lastAudioUrl) {
+                const botAudio = new Audio(lastAudioUrl);
+                botAudio.play();
+            } else {
+                alert("No response audio available yet!");
             }
         });
     </script>

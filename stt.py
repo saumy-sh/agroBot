@@ -8,8 +8,8 @@ device = 'cpu'
 print(device)
 
 speech2text = Speech2Text(
-    asr_train_config="/kaggle/input/shrutam-model/shrutam_model/Branchformer1024/config.yaml",
-    asr_model_file="/kaggle/input/shrutam-model/shrutam_model/Branchformer1024/model.pth",
+    asr_train_config="models/shrutam_model/Branchformer1024/config.yaml",
+    asr_model_file="models/shrutam_model/Branchformer1024/model.pth",
     device=device,
     beam_size=5
 )
@@ -24,5 +24,6 @@ def shrutam_transcriber(audio_path):
     # Ensure it's 2D [1, samples] for most STT models
     # wav = np.expand_dims(wav, axis=0)
     text = speech2text(wav)[0][0]
+    print(text)
     # text = conformer_model.transcribe([wav], batch_size=1,logprobs=False, language_id=lang_id)
     return text
