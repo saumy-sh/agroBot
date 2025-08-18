@@ -2,6 +2,14 @@
 
 AgroBot is basically an intelligent agricultural assistant that helps farmers identify crop diseases through voice interactions and image analysis. The system combines speech recognition, computer vision, and NLP to provide treatment recommendations in local languages (hindi).
 
+# Project Testing
+Our project can be tested by running a kaggle notebook which has all the implementations. The link is here:
+[Notebook implementation](https://www.kaggle.com/code/zoomershredder/chatbot-agrobot)
+
+
+## Architecture
+![project architecture](images/arch.jpg)
+
 ## 🚀 Features
 
 - **Voice-to-Voice Interaction**: Speak in Hindi and get audio responses back
@@ -27,7 +35,7 @@ Audio Input (Hindi) → STT → Translation (Hi→En) → Disease Classification
 
 ## 📋 Prerequisites
 
-- Python 3.8+
+- Python 3.11.13
 - PyTorch
 - CUDA (optional, for GPU acceleration)
 - Flask
@@ -46,30 +54,6 @@ cd agrobot
 pip install -r requirements.txt
 ```
 
-3. **Install additional packages**
-```bash
-# For STT model
-pip install espnet
-pip install librosa
-
-# For translation models
-pip install IndicTransToolkit
-pip install transformers
-
-# For TTS
-pip install torchaudio
-
-# For computer vision
-pip install torchvision
-pip install Pillow
-
-# For RAG system
-pip install sentence-transformers
-pip install scikit-learn
-
-# Web framework
-pip install Flask
-```
 
 ## 📦 Model Setup
 
@@ -80,8 +64,7 @@ pip install Flask
    - Weights: `shrutam_model/Branchformer1024/model.pth`
 
 2. **MobileNetV2 Crop Disease Classifier**
-   - Path: `best_finetuned_model.pth`
-   - Update `MODEL_PATH` in `main.py`
+   - Path: `models\best_finetuned_model.pth`
 
 3. **IndicTrans2 Translation Models**
    - Indic-to-English: `ai4bharat/indictrans2-indic-en-dist-200M`
@@ -102,6 +85,7 @@ The system uses a JSON database (`database/disease_database.json`) containing:
   "treatment": "Use resistant hybrids. Apply fungicides..."
 }
 ```
+We use sentence transformer(sentence-transformers/all-MiniLM-L6-v2) to convert it to embedding.
 
 ### Supported Crops & Diseases
 
@@ -286,4 +270,4 @@ For questions and support, please open an issue in the GitHub repository.
 
 ---
 
-**Note**: Ensure you have the required model files and proper hardware setup before running the application. GPU acceleration is recommended for optimal performance.
+**Note**: Ensure you have the required model files and proper hardware setup before running the application. 
