@@ -22,7 +22,7 @@ class ImprovedTTSProcessor:
         self.silence_duration = 0.3  # seconds of silence between chunks
         self.silence_samples = int(self.sample_rate * self.silence_duration)
     
-    def smart_chunk_text(self, text, max_chars=100):
+    def smart_chunk_text(self, text, max_chars=300):
         """
         Intelligently chunk text based on sentence boundaries and punctuation.
         Prioritizes natural breaks over character limits.

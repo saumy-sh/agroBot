@@ -1,104 +1,104 @@
 [
   {
-    "crop": "Corn",
-    "disease": "Common Rust",
-    "symptoms": "Small, round to elongated reddish-brown pustules appear on both leaf surfaces, often in scattered patches.",
-    "treatment": "Use resistant hybrids. If severe, apply fungicides like Mancozeb or Propiconazole at recommended doses."
+    "crop": "corn",
+    "disease": "common rust",
+    "symptoms": "small, round to elongated reddish-brown pustules on both leaf surfaces, scattered patches.",
+    "treatment": "use resistant hybrids, apply fungicides like mancozeb or propiconazole if severe."
   },
   {
-    "crop": "Corn",
-    "disease": "Gray Leaf Spot",
-    "symptoms": "Narrow, rectangular gray to tan lesions running parallel between leaf veins. Severe infection causes premature leaf death.",
-    "treatment": "Adopt crop rotation, use resistant hybrids, and apply fungicides like Azoxystrobin or Trifloxystrobin when needed."
+    "crop": "corn",
+    "disease": "gray leaf spot",
+    "symptoms": "narrow, rectangular gray to tan lesions between leaf veins, severe infection causes early leaf death.",
+    "treatment": "crop rotation, resistant hybrids, fungicides like azoxystrobin or trifloxystrobin."
   },
   {
-    "crop": "Corn",
-    "disease": "Healthy",
-    "symptoms": "No visible disease symptoms, green and healthy leaves.",
-    "treatment": "No treatment required. Maintain good crop management practices."
+    "crop": "corn",
+    "disease": "healthy",
+    "symptoms": "no disease symptoms, green healthy leaves.",
+    "treatment": "no treatment, maintain good practices."
   },
   {
-    "crop": "Corn",
-    "disease": "Northern Leaf Blight",
-    "symptoms": "Cigar-shaped gray-green lesions on leaves, which later turn tan with dark borders.",
-    "treatment": "Use resistant hybrids. Apply fungicides like Mancozeb, Tebuconazole, or Azoxystrobin if incidence is high."
+    "crop": "corn",
+    "disease": "northern leaf blight",
+    "symptoms": "cigar-shaped gray-green lesions, later tan with dark borders.",
+    "treatment": "resistant hybrids, fungicides like mancozeb, tebuconazole, or azoxystrobin."
   },
   {
-    "crop": "Potato",
-    "disease": "Early Blight",
-    "symptoms": "Dark brown concentric rings on older leaves. Yellowing around lesions; severe cases cause leaf drop.",
-    "treatment": "Spray Mancozeb (0.2%) or Chlorothalonil. Use disease-free certified seed tubers."
+    "crop": "potato",
+    "disease": "early blight",
+    "symptoms": "dark brown concentric rings on old leaves, yellowing, leaf drop in severe cases.",
+    "treatment": "spray mancozeb or chlorothalonil, use certified seed tubers."
   },
   {
-    "crop": "Potato",
-    "disease": "Healthy",
-    "symptoms": "No visible disease symptoms, vigorous growth observed.",
-    "treatment": "No treatment required. Ensure proper irrigation and nutrient management."
+    "crop": "potato",
+    "disease": "healthy",
+    "symptoms": "no disease symptoms, vigorous growth.",
+    "treatment": "no treatment, ensure good irrigation and nutrition."
   },
   {
-    "crop": "Potato",
-    "disease": "Late Blight",
-    "symptoms": "Water-soaked dark lesions on leaves, often with white fungal growth on undersides during humid conditions.",
-    "treatment": "Spray Metalaxyl + Mancozeb (0.25%) or Cymoxanil + Mancozeb at 7–10 day intervals. Remove infected plants."
+    "crop": "potato",
+    "disease": "late blight",
+    "symptoms": "water-soaked dark lesions, white fungal growth on undersides in humid weather.",
+    "treatment": "spray metalaxyl+mancozeb or cymoxanil+mancozeb at 7–10 day intervals, remove infected plants."
   },
   {
-    "crop": "Rice",
-    "disease": "Brown Spot",
-    "symptoms": "Small, circular to oval dark brown spots with yellow halos on leaves and seeds.",
-    "treatment": "Treat seed with fungicides before sowing. Apply Mancozeb (0.25%) or Propiconazole. Maintain balanced fertilization."
+    "crop": "rice",
+    "disease": "brown spot",
+    "symptoms": "small, oval dark brown spots with yellow halos on leaves and seeds.",
+    "treatment": "treat seed, spray mancozeb or propiconazole, maintain balanced fertilization."
   },
   {
-    "crop": "Rice",
-    "disease": "Healthy",
-    "symptoms": "Green healthy leaves and tillers, no disease observed.",
-    "treatment": "No treatment required. Maintain proper spacing and irrigation."
+    "crop": "rice",
+    "disease": "healthy",
+    "symptoms": "green healthy leaves and tillers.",
+    "treatment": "no treatment, maintain spacing and irrigation."
   },
   {
-    "crop": "Rice",
-    "disease": "Leaf Blast",
-    "symptoms": "Spindle-shaped lesions with gray centers and brown margins on leaves.",
-    "treatment": "Spray Tricyclazole (0.6 g/l) or Isoprothiolane. Avoid excess nitrogen and maintain proper plant spacing."
+    "crop": "rice",
+    "disease": "leaf blast",
+    "symptoms": "spindle-shaped lesions with gray centers and brown margins.",
+    "treatment": "spray tricyclazole or isoprothiolane, avoid excess nitrogen, proper spacing."
   },
   {
-    "crop": "Rice",
-    "disease": "Neck Blast",
-    "symptoms": "Neck of the panicle turns brown/black, panicles remain unfilled or partially filled.",
-    "treatment": "Spray Tricyclazole (0.6 g/l) at booting stage and repeat at flowering stage. Use resistant varieties."
+    "crop": "rice",
+    "disease": "neck blast",
+    "symptoms": "panicle neck turns brown/black, unfilled or partially filled panicles.",
+    "treatment": "spray tricyclazole at booting and flowering, use resistant varieties."
   },
   {
-    "crop": "Wheat",
-    "disease": "Brown Rust",
-    "symptoms": "Small, orange-brown pustules appear scattered on leaves and stems.",
-    "treatment": "Spray Propiconazole (0.1%) or Mancozeb. Grow rust-resistant varieties."
+    "crop": "wheat",
+    "disease": "brown rust",
+    "symptoms": "small orange-brown pustules on leaves and stems.",
+    "treatment": "spray propiconazole or mancozeb, grow resistant varieties."
   },
   {
-    "crop": "Wheat",
-    "disease": "Healthy",
-    "symptoms": "Green leaves and healthy tillers, no disease found.",
-    "treatment": "No treatment required. Maintain crop hygiene and irrigation schedules."
+    "crop": "wheat",
+    "disease": "healthy",
+    "symptoms": "green leaves and healthy tillers.",
+    "treatment": "no treatment, maintain hygiene and irrigation."
   },
   {
-    "crop": "Wheat",
-    "disease": "Yellow Rust",
-    "symptoms": "Yellow linear stripes of powdery pustules appear on leaves, mostly during cool and wet weather.",
-    "treatment": "Spray Tebuconazole (0.1%) or Propiconazole. Grow resistant varieties and monitor fields regularly."
+    "crop": "wheat",
+    "disease": "yellow rust",
+    "symptoms": "yellow linear stripes of powdery pustules during cool wet weather.",
+    "treatment": "spray tebuconazole or propiconazole, grow resistant varieties, monitor fields."
   },
   {
-    "crop": "Sugarcane",
-    "disease": "Red Rot",
-    "symptoms": "Leaves with red streaks, stalks show red discolored pith with a sour smell.",
-    "treatment": "Destroy infected clumps. Use resistant varieties. Apply fungicide-treated setts before planting."
+    "crop": "sugarcane",
+    "disease": "red rot",
+    "symptoms": "red streaks on leaves, stalk pith red with sour smell.",
+    "treatment": "destroy infected clumps, resistant varieties, fungicide-treated setts."
   },
   {
-    "crop": "Sugarcane",
-    "disease": "Healthy",
-    "symptoms": "Green and tall canes with no disease symptoms.",
-    "treatment": "No treatment required. Maintain proper soil nutrition and irrigation."
+    "crop": "sugarcane",
+    "disease": "healthy",
+    "symptoms": "green and tall canes, no disease.",
+    "treatment": "no treatment, maintain nutrition and irrigation."
   },
   {
-    "crop": "Sugarcane",
-    "disease": "Bacterial Blight",
-    "symptoms": "Yellowish-white leaf streaks starting from tip, leaves may wither and dry prematurely.",
-    "treatment": "Use disease-free seed setts. Hot water treatment (50°C for 30 min) of seed cane. Use resistant varieties."
+    "crop": "sugarcane",
+    "disease": "bacterial blight",
+    "symptoms": "yellowish-white streaks from tip, leaves dry early.",
+    "treatment": "use disease-free setts, hot water treatment, resistant varieties."
   }
 ]

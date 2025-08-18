@@ -17,6 +17,29 @@ except Exception as e:
 
 MODEL_PATH = "models/best_finetuned_model.pth"  # Path to your fine-tuned model
 
+# diseases mapping
+mapping = [
+    {"label": "Corn___Common_Rust", "crop": "corn", "disease": "common rust"},
+    {"label": "Corn___Gray_Leaf_Spot", "crop": "corn", "disease": "gray leaf spot"},
+    {"label": "Corn___Healthy", "crop": "corn", "disease": "healthy"},
+    {"label": "Corn___Northern_Leaf_Blight", "crop": "corn", "disease": "northern leaf blight"},
+    {"label": "Potato___Early_Blight", "crop": "potato", "disease": "early blight"},
+    {"label": "Potato___Healthy", "crop": "potato", "disease": "healthy"},
+    {"label": "Potato___Late_Blight", "crop": "potato", "disease": "late blight"},
+    {"label": "Rice___Brown_Spot", "crop": "rice", "disease": "brown spot"},
+    {"label": "Rice___Healthy", "crop": "rice", "disease": "healthy"},
+    {"label": "Rice___Leaf_Blast", "crop": "rice", "disease": "leaf blast"},
+    {"label": "Rice___Neck_Blast", "crop": "rice", "disease": "neck blast"},
+    {"label": "Wheat___Brown_Rust", "crop": "wheat", "disease": "brown rust"},
+    {"label": "Wheat___Healthy", "crop": "wheat", "disease": "healthy"},
+    {"label": "Wheat___Yellow_Rust", "crop": "wheat", "disease": "yellow rust"},
+    {"label": "Sugarcane__Red_Rot", "crop": "sugarcane", "disease": "red rot"},
+    {"label": "Sugarcane__Healthy", "crop": "sugarcane", "disease": "healthy"},
+    {"label": "Sugarcane__Bacterial Blight", "crop": "sugarcane", "disease": "bacterial blight"}
+]
+
+
+
 pipe = initialize_tts()
 predictor = MobileNetV2Predictor(MODEL_PATH)
 
@@ -131,13 +154,21 @@ def process():
         # ---------- RAG ----------
         rag_response_en = rag_system.search(query, top_k=3)
         print(rag_response_en)
+        clean_response = [
+            {
+                "crop": item["crop"],
+                "disease": item["disease"],
+                "symptoms": item["symptoms"],
+                "treatment": item["treatment"]
+            }
+            for item in rag_response_en
+        ]
         print("4")
 
-        llm_response = call_llm(rag_response_en[0],en_text)
+        llm_response = call_llm(clean_response[0],en_text)
         print("#######################################################")
         print(llm_response)
         print("#######################################################")
-
         # ---------- Translate response back to Hindi ----------
         rag_response_hi = translate_to_indic(llm_response,"hindi")
         print("5")

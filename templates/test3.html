@@ -23,7 +23,7 @@
             width: fit-content;
             box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
         }
-        #record-btn, #play-response-btn {
+        #play-response-btn {
             padding: 10px 20px;
             font-size: 16px;
             background-color: #2e7d32;
@@ -33,7 +33,7 @@
             cursor: pointer;
             margin-top: 10px;
         }
-        #record-btn:hover, #play-response-btn:hover {
+        #play-response-btn:hover {
             background-color: #1b5e20;
         }
         audio {
@@ -112,13 +112,11 @@
             <button id="play-response-btn">🔊 Play AgroBot Response</button>
         </div>
 
-        <!-- Audio Record/Upload Section -->
+        <!-- Audio Upload Section -->
         <div class="chat-box">
-            <h3 id="speak-title">🎙 Speak to AgroBot</h3>
-            <button id="record-btn">🎙 Start Recording</button>
-            <br><br>
+            <h3 id="speak-title">🎙 Upload Audio to AgroBot</h3>
             <input type="file" id="audio-upload" accept="audio/*">
-            <br>
+            <br><br>
             <audio id="audio-playback" controls style="display:none;"></audio>
             <p id="stt-result" style="color:blue;"></p>
         </div>
@@ -139,10 +137,7 @@
                 responseTitle: "💬 AgroBot Response",
                 waiting: "Waiting for input...",
                 playResponse: "🔊 Play AgroBot Response",
-                speakTitle: "🎙 Speak to AgroBot",
-                startRecording: "🎙 Start Recording",
-                stopRecording: "⏹ Stop Recording",
-                audioProcessed: "Audio processed.",
+                speakTitle: "🎙 Upload Audio to AgroBot",
                 uploadedProcessed: "Uploaded audio processed.",
                 noResponse: "No response.",
                 noAudio: "No response audio available yet!",
@@ -155,10 +150,7 @@
                 responseTitle: "💬 एग्रोबॉट का उत्तर",
                 waiting: "इनपुट की प्रतीक्षा हो रही है...",
                 playResponse: "🔊 एग्रोबॉट का उत्तर चलाएँ",
-                speakTitle: "🎙 एग्रोबॉट से बात करें",
-                startRecording: "🎙 रिकॉर्डिंग शुरू करें",
-                stopRecording: "⏹ रिकॉर्डिंग रोकें",
-                audioProcessed: "ऑडियो प्रोसेस किया गया।",
+                speakTitle: "🎙 एग्रोबॉट के लिए ऑडियो अपलोड करें",
                 uploadedProcessed: "अपलोड किया गया ऑडियो प्रोसेस हुआ।",
                 noResponse: "कोई उत्तर नहीं।",
                 noAudio: "अभी कोई ऑडियो उपलब्ध नहीं है!",
@@ -178,7 +170,6 @@
             document.getElementById("response-text").textContent = t.waiting;
             document.getElementById("play-response-btn").textContent = t.playResponse;
             document.getElementById("speak-title").textContent = t.speakTitle;
-            document.getElementById("record-btn").textContent = t.startRecording;
         }
 
         document.getElementById("language-selector").addEventListener("change", function() {
@@ -203,108 +194,7 @@
             }
         });
 
-        // ----------- Enhanced Recording Logic with WAV Support ------------
-        let mediaRecorder;
-        let audioChunks = [];
-        let isRecording = false;
-        const recordBtn = document.getElementById("record-btn");
-        const audioPlayback = document.getElementById("audio-playback");
-
-        // Function to convert blob to WAV (simplified approach)
-        function createWAVFile(audioChunks, mimeType) {
-            // For browsers that support audio/wav, use it directly
-            if (mimeType.includes('audio/wav')) {
-                return new Blob(audioChunks, { type: 'audio/wav' });
-            }
-            // Otherwise, return the original blob (backend will handle conversion)
-            return new Blob(audioChunks, { type: mimeType });
-        }
-
-        recordBtn.addEventListener("click", function() {
-            const t = translations[currentLang];
-            if (!isRecording) {
-                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                    // Try to use WAV format if supported, otherwise fall back to webm
-                    let options = {};
-                    if (MediaRecorder.isTypeSupported('audio/wav')) {
-                        options = { mimeType: 'audio/wav' };
-                    } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-                        options = { mimeType: 'audio/webm;codecs=opus' };
-                    } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
-                        options = { mimeType: 'audio/ogg;codecs=opus' };
-                    }
-
-                    mediaRecorder = new MediaRecorder(stream, options);
-                    mediaRecorder.start();
-                    isRecording = true;
-                    recordBtn.textContent = t.stopRecording;
-                    audioChunks = [];
-
-                    mediaRecorder.addEventListener("dataavailable", event => {
-                        audioChunks.push(event.data);
-                    });
-
-                    mediaRecorder.addEventListener("stop", () => {
-                        const mimeType = mediaRecorder.mimeType;
-                        const audioBlob = createWAVFile(audioChunks, mimeType);
-                        recordedAudio = audioBlob;
-
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        audioPlayback.src = audioUrl;
-                        audioPlayback.style.display = "block";
-
-                        if (!selectedImage) {
-                            alert(t.uploadFirst);
-                            return;
-                        }
-
-                        const formData = new FormData();
-                        // Determine file extension based on mime type
-                        let filename = "recording.wav";
-                        if (mimeType.includes('webm')) {
-                            filename = "recording.webm";
-                        } else if (mimeType.includes('ogg')) {
-                            filename = "recording.ogg";
-                        }
-                        
-                        formData.append("audio", recordedAudio, filename);
-                        formData.append("image", selectedImage);
-
-                        fetch(`${backendURL}/process`, { method: "POST", body: formData })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.error) {
-                                    console.error("Backend error:", data.error);
-                                    document.getElementById("stt-result").textContent = "Processing error occurred.";
-                                    document.getElementById("response-text").textContent = data.rag_response_hi || "Error processing request.";
-                                } else {
-                                    document.getElementById("stt-result").textContent = t.audioProcessed;
-                                    document.getElementById("response-text").textContent = data.rag_response_hi || t.noResponse;
-
-                                    if (data.audio_url) {
-                                        lastAudioUrl = `${backendURL}${data.audio_url}`;
-                                        new Audio(lastAudioUrl).play();
-                                    }
-                                }
-                            })
-                            .catch(err => {
-                                console.error("Process error:", err);
-                                document.getElementById("stt-result").textContent = "Network error occurred.";
-                            });
-                    });
-
-                }).catch(err => {
-                    console.error("Error accessing microphone:", err);
-                    alert("Error accessing microphone. Please check permissions.");
-                });
-            } else {
-                mediaRecorder.stop();
-                isRecording = false;
-                recordBtn.textContent = t.startRecording;
-            }
-        });
-
-        // ----------- Upload Audio Logic (unchanged) ------------
+        // ----------- Upload Audio Logic ------------
         document.getElementById("audio-upload").addEventListener("change", function(event) {
             const t = translations[currentLang];
             const file = event.target.files[0];
@@ -312,6 +202,7 @@
                 recordedAudio = file;
                 const audioUrl = URL.createObjectURL(file);
 
+                const audioPlayback = document.getElementById("audio-playback");
                 audioPlayback.src = audioUrl;
                 audioPlayback.style.display = "block";
 
@@ -349,7 +240,7 @@
             }
         });
 
-        // ----------- Play Button Logic (unchanged) ------------
+        // ----------- Play Button Logic ------------
         document.getElementById("play-response-btn").addEventListener("click", function() {
             const t = translations[currentLang];
             if (lastAudioUrl) {
