@@ -1,2 +1,6 @@
 uploads
 .agrobot
+output
+__pycache__
+installation.txt
+models
