@@ -1,35 +1,43 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+model_name = "Qwen/Qwen2.5-3B-Instruct"
 
-model_name = "bharatgenai/AgriParam"
-tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=False)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
-    trust_remote_code=True,
-    torch_dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
-    device_map="cpu"
+    torch_dtype="auto",
+    device_map="auto"
 )
+tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 
 def call_llm(context,user_input):
+    context = str(context)
+    prompt = f"""<context> {context} Query: {user_input}"""
+    messages = [
+        {"role": "system", "content": """You are a crop disease expert assisting farmers in issues related to crop diseases . I am giving you a <context> that is just some information realated to the query . So first make use of the knowledge in the context , then use your own knowledge to give additional information. Clear Instructions : You are a text normalizer. Convert all numbers, dates, percentages, fractions, and symbols into plain spoken English. 
+    Do not use any digits or special characters. 
+    Example:
+    - "0.2%" → "zero point two percent"
+    - "Rs. 500" → "five hundred rupees"
+    - "2025-08-18" → "eighteenth of August twenty twenty five"
+    """},
+        {"role": "user", "content": prompt}
+    ]
+    text = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+    )
+    model_inputs = tokenizer([text], return_tensors="pt").to(model.device)
 
+    generated_ids = model.generate(
+        **model_inputs,
+        max_new_tokens=512
+    )
+    generated_ids = [
+        output_ids[len(input_ids):] for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+    ]
 
+    response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
 
-    prompt = f"<context> {context} <user> {user_input} <assistant>"
-    # prompt = f"<context> {user_context} <user> {user_input} <assistant>"
-    # prompt = f"<user> {user_input1} <assistant> {user_input2} <user> {user_input3} <assistant>..."
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-    ### play with the hyperparameters a little .
-    with torch.no_grad():
-        output = model.generate(
-            **inputs,
-            max_new_tokens=300,
-            do_sample=True,
-            top_k=50,
-            top_p=0.95,
-            temperature=0.6,
-            eos_token_id=tokenizer.eos_token_id,
-            use_cache=False
-        )
-
-    return tokenizer.decode(output[0], skip_special_tokens=True)
+    print(response)
+    return response

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>🌱 AgroBot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        h1 {
+            color: #2e7d32;
+            margin-top: 30px;
+        }
+        .section {
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            width: fit-content;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+        #record-btn, #play-response-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #record-btn:hover, #play-response-btn:hover {
+            background-color: #1b5e20;
+        }
+        audio {
+            margin-top: 15px;
+        }
+        /* Chat layout */
+        .chat-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .chat-box {
+            width: 300px;
+            height: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+            padding: 15px;
+            text-align: left;
+            overflow-y: auto;
+        }
+        .chat-box h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .response-text {
+            color: #333;
+            margin-top: 10px;
+            white-space: pre-wrap;
+        }
+        /* Language Selector */
+        .lang-select {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        select {
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #2e7d32;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Language Selector -->
+    <div class="lang-select">
+        <select id="language-selector">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+        </select>
+    </div>
+
+    <h1 id="title">🌱 AgroBot</h1>
+    <p id="subtitle">Your AI assistant for crops & farming</p>
+
+    <!-- Image Upload Section -->
+    <div class="section">
+        <h3 id="upload-label">📷 Upload Crop Image</h3>
+        <input type="file" id="image-upload" accept="image/*">
+        <br><br>
+        <img id="preview" src="" alt="Uploaded Image" style="max-width:300px; display:none;">
+        <p id="image-result" style="color:green;"></p>
+    </div>
+
+    <!-- Chat style container -->
+    <div class="chat-container">
+
+        <!-- Text Response Box -->
+        <div class="chat-box">
+            <h3 id="response-title">💬 AgroBot Response</h3>
+            <div id="response-text" class="response-text">Waiting for input...</div>
+            <button id="play-response-btn">🔊 Play AgroBot Response</button>
+        </div>
+
+        <!-- Audio Record/Upload Section -->
+        <div class="chat-box">
+            <h3 id="speak-title">🎙 Speak to AgroBot</h3>
+            <button id="record-btn">🎙 Start Recording</button>
+            <br><br>
+            <input type="file" id="audio-upload" accept="audio/*">
+            <br>
+            <audio id="audio-playback" controls style="display:none;"></audio>
+            <p id="stt-result" style="color:blue;"></p>
+        </div>
+    </div>
+
+    <script>
+        const backendURL = "http://127.0.0.1:5000"; // Flask backend
+        let selectedImage = null; 
+        let recordedAudio = null; 
+        let lastAudioUrl = null;  
+
+        // -------- Language Texts --------
+        const translations = {
+            en: {
+                title: "🌱 AgroBot",
+                subtitle: "Your AI assistant for crops & farming",
+                uploadLabel: "📷 Upload Crop Image",
+                responseTitle: "💬 AgroBot Response",
+                waiting: "Waiting for input...",
+                playResponse: "🔊 Play AgroBot Response",
+                speakTitle: "🎙 Speak to AgroBot",
+                startRecording: "🎙 Start Recording",
+                stopRecording: "⏹ Stop Recording",
+                audioProcessed: "Audio processed.",
+                uploadedProcessed: "Uploaded audio processed.",
+                noResponse: "No response.",
+                noAudio: "No response audio available yet!",
+                uploadFirst: "Please upload an image first!"
+            },
+            hi: {
+                title: "🌱 एग्रोबॉट",
+                subtitle: "आपका कृषि और खेती सहायक",
+                uploadLabel: "📷 फसल की तस्वीर अपलोड करें",
+                responseTitle: "💬 एग्रोबॉट का उत्तर",
+                waiting: "इनपुट की प्रतीक्षा हो रही है...",
+                playResponse: "🔊 एग्रोबॉट का उत्तर चलाएँ",
+                speakTitle: "🎙 एग्रोबॉट से बात करें",
+                startRecording: "🎙 रिकॉर्डिंग शुरू करें",
+                stopRecording: "⏹ रिकॉर्डिंग रोकें",
+                audioProcessed: "ऑडियो प्रोसेस किया गया।",
+                uploadedProcessed: "अपलोड किया गया ऑडियो प्रोसेस हुआ।",
+                noResponse: "कोई उत्तर नहीं।",
+                noAudio: "अभी कोई ऑडियो उपलब्ध नहीं है!",
+                uploadFirst: "कृपया पहले एक तस्वीर अपलोड करें!"
+            }
+        };
+
+        let currentLang = "en"; // default
+
+        function updateLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            document.getElementById("title").textContent = t.title;
+            document.getElementById("subtitle").textContent = t.subtitle;
+            document.getElementById("upload-label").textContent = t.uploadLabel;
+            document.getElementById("response-title").textContent = t.responseTitle;
+            document.getElementById("response-text").textContent = t.waiting;
+            document.getElementById("play-response-btn").textContent = t.playResponse;
+            document.getElementById("speak-title").textContent = t.speakTitle;
+            document.getElementById("record-btn").textContent = t.startRecording;
+        }
+
+        document.getElementById("language-selector").addEventListener("change", function() {
+            updateLanguage(this.value);
+        });
+
+        // Initialize language
+        updateLanguage("en");
+
+        // ----------- Image Preview Logic ------------
+        document.getElementById("image-upload").addEventListener("change", function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedImage = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById("preview");
+                    preview.src = e.target.result;
+                    preview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // ----------- Enhanced Recording Logic with WAV Support ------------
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+        const recordBtn = document.getElementById("record-btn");
+        const audioPlayback = document.getElementById("audio-playback");
+
+        // Function to convert blob to WAV (simplified approach)
+        function createWAVFile(audioChunks, mimeType) {
+            // For browsers that support audio/wav, use it directly
+            if (mimeType.includes('audio/wav')) {
+                return new Blob(audioChunks, { type: 'audio/wav' });
+            }
+            // Otherwise, return the original blob (backend will handle conversion)
+            return new Blob(audioChunks, { type: mimeType });
+        }
+
+        recordBtn.addEventListener("click", function() {
+            const t = translations[currentLang];
+            if (!isRecording) {
+                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                    // Try to use WAV format if supported, otherwise fall back to webm
+                    let options = {};
+                    if (MediaRecorder.isTypeSupported('audio/wav')) {
+                        options = { mimeType: 'audio/wav' };
+                    } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                        options = { mimeType: 'audio/webm;codecs=opus' };
+                    } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+                        options = { mimeType: 'audio/ogg;codecs=opus' };
+                    }
+
+                    mediaRecorder = new MediaRecorder(stream, options);
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.textContent = t.stopRecording;
+                    audioChunks = [];
+
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    mediaRecorder.addEventListener("stop", () => {
+                        const mimeType = mediaRecorder.mimeType;
+                        const audioBlob = createWAVFile(audioChunks, mimeType);
+                        recordedAudio = audioBlob;
+
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        audioPlayback.src = audioUrl;
+                        audioPlayback.style.display = "block";
+
+                        if (!selectedImage) {
+                            alert(t.uploadFirst);
+                            return;
+                        }
+
+                        const formData = new FormData();
+                        // Determine file extension based on mime type
+                        let filename = "recording.wav";
+                        if (mimeType.includes('webm')) {
+                            filename = "recording.webm";
+                        } else if (mimeType.includes('ogg')) {
+                            filename = "recording.ogg";
+                        }
+                        
+                        formData.append("audio", recordedAudio, filename);
+                        formData.append("image", selectedImage);
+
+                        fetch(`${backendURL}/process`, { method: "POST", body: formData })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.error) {
+                                    console.error("Backend error:", data.error);
+                                    document.getElementById("stt-result").textContent = "Processing error occurred.";
+                                    document.getElementById("response-text").textContent = data.rag_response_hi || "Error processing request.";
+                                } else {
+                                    document.getElementById("stt-result").textContent = t.audioProcessed;
+                                    document.getElementById("response-text").textContent = data.rag_response_hi || t.noResponse;
+
+                                    if (data.audio_url) {
+                                        lastAudioUrl = `${backendURL}${data.audio_url}`;
+                                        new Audio(lastAudioUrl).play();
+                                    }
+                                }
+                            })
+                            .catch(err => {
+                                console.error("Process error:", err);
+                                document.getElementById("stt-result").textContent = "Network error occurred.";
+                            });
+                    });
+
+                }).catch(err => {
+                    console.error("Error accessing microphone:", err);
+                    alert("Error accessing microphone. Please check permissions.");
+                });
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordBtn.textContent = t.startRecording;
+            }
+        });
+
+        // ----------- Upload Audio Logic (unchanged) ------------
+        document.getElementById("audio-upload").addEventListener("change", function(event) {
+            const t = translations[currentLang];
+            const file = event.target.files[0];
+            if (file) {
+                recordedAudio = file;
+                const audioUrl = URL.createObjectURL(file);
+
+                audioPlayback.src = audioUrl;
+                audioPlayback.style.display = "block";
+
+                if (!selectedImage) {
+                    alert(t.uploadFirst);
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("audio", recordedAudio);
+                formData.append("image", selectedImage);
+
+                fetch(`${backendURL}/process`, { method: "POST", body: formData })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error("Backend error:", data.error);
+                            document.getElementById("stt-result").textContent = "Processing error occurred.";
+                            document.getElementById("response-text").textContent = data.rag_response_hi || "Error processing request.";
+                        } else {
+                            document.getElementById("stt-result").textContent = t.uploadedProcessed;
+                            document.getElementById("response-text").textContent = data.rag_response_hi || t.noResponse;
+
+                            if (data.audio_url) {
+                                lastAudioUrl = `${backendURL}${data.audio_url}`;
+                                const botAudio = new Audio(lastAudioUrl);
+                                botAudio.play();
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Process error:", err);
+                        document.getElementById("stt-result").textContent = "Network error occurred.";
+                    });
+            }
+        });
+
+        // ----------- Play Button Logic (unchanged) ------------
+        document.getElementById("play-response-btn").addEventListener("click", function() {
+            const t = translations[currentLang];
+            if (lastAudioUrl) {
+                const botAudio = new Audio(lastAudioUrl);
+                botAudio.play();
+            } else {
+                alert(t.noAudio);
+            }
+        });
+    </script>
+
+</body>
+</html>

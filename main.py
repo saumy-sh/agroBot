@@ -7,6 +7,14 @@ from rag import CropDiseaseRAG                         # RAG pipeline
 from tts import ImprovedTTSProcessor,initialize_tts    # back-translation and TTS for hi
 from llm import call_llm
 
+# Try to import pydub, but handle if FFmpeg is not available
+try:
+    from pydub import AudioSegment
+    PYDUB_AVAILABLE = True
+except Exception as e:
+    print(f"Warning: pydub/FFmpeg not fully available: {e}")
+    PYDUB_AVAILABLE = False
+
 MODEL_PATH = "models/best_finetuned_model.pth"  # Path to your fine-tuned model
 
 pipe = initialize_tts()
@@ -25,10 +33,41 @@ OUTPUT_FOLDER = "output"
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 
+def convert_audio_to_wav(audio_path):
+    """
+    Convert audio file to WAV format with error handling
+    Returns the converted file path or original path if conversion fails
+    """
+    if not PYDUB_AVAILABLE:
+        print("Warning: Cannot convert audio format - FFmpeg not available. Using original file.")
+        return audio_path
+    
+    if audio_path.endswith(".webm") or audio_path.endswith(".ogg"):
+        wav_path = audio_path.rsplit(".", 1)[0] + ".wav"
+        try:
+            # Attempt to convert using pydub
+            audio = AudioSegment.from_file(audio_path)
+            audio.export(wav_path, format="wav")
+            print(f"Successfully converted {audio_path} to {wav_path}")
+            return wav_path
+        except FileNotFoundError as e:
+            if "ffprobe" in str(e) or "ffmpeg" in str(e):
+                print(f"FFmpeg not found. Please install FFmpeg to handle WebM/OGG audio files.")
+                print("For now, trying to use original file...")
+                return audio_path
+            else:
+                raise e
+        except Exception as e:
+            print(f"Audio conversion failed: {e}")
+            print("Using original audio file...")
+            return audio_path
+    
+    return audio_path
+
 
 @app.route("/")
 def home():
-    return render_template("test2.html")
+    return render_template("test3.html")
 
 
 # ----------------- MAIN PIPELINE -----------------
@@ -57,59 +96,75 @@ def process():
 
     audio_file.save(audio_path)
     image_file.save(image_path)
-
-    # ---------- shrutamSTT ----------
-    hindi_text = shrutam_transcriber(audio_path) 
-    print("##############")
-    # print(hindi_text)  
-    print("1")
-    # ---------- Translate to English ----------
-    en_text = translate_to_en(hindi_text,"hindi")
-    # print(en_text)
-    print("######################")
-    print("2")
-    # ---------- Image Classification ----------
-    single_result = predictor.predict_single_image(image_path, return_probabilities=False)
     
-    predicted_class = single_result['predicted_class'] # e.g., "Corn___Northern_Leaf_Blight"
-    crop_name = predicted_class.split("___")[0]
-    disease_name = predicted_class.split("___")[1]
-    # print(crop_name)
-    # print(disease_name)
-    print("3")
-    # ---------- Build query for RAG ----------
-    query = f"""
-        crop: {crop_name}
-        disease: {disease_name}
-        symptoms: {en_text if en_text else ""}
-    """
+    # Convert audio to WAV if needed (with error handling)
+    audio_path = convert_audio_to_wav(audio_path)
 
-    # ---------- RAG ----------
-    rag_response_en = rag_system.search(query, top_k=3)
-    print("4")
+    try:
+        # ---------- shrutamSTT ----------
+        hindi_text = shrutam_transcriber(audio_path) 
+        print("##############")
+        # print(hindi_text)  
+        print("1")
+        
+        # ---------- Translate to English ----------
+        en_text = translate_to_en(hindi_text,"hindi")
+        print(en_text)
+        print("######################")
+        print("2")
+        
+        # ---------- Image Classification ----------
+        single_result = predictor.predict_single_image(image_path, return_probabilities=False)
+        
+        predicted_class = single_result['predicted_class'] # e.g., "Corn___Northern_Leaf_Blight"
+        
+        print(predicted_class)
+        print("#######################################")
+        print("####################################")
+        print("##################################")
+        
+        # ---------- Build query for RAG ----------
+        query = f"""
+            crop_disease: {predicted_class}
+        """
 
-    llm_response = call_llm(rag_response_en[0],en_text)
-    print(llm_response)
-    print("#######################################################")
+        # ---------- RAG ----------
+        rag_response_en = rag_system.search(query, top_k=3)
+        print(rag_response_en)
+        print("4")
 
-    # ---------- Translate response back to Hindi ----------
-    rag_response_hi = translate_to_indic(rag_response_en[0]["treatment"],"hindi")
-    print("5")
+        llm_response = call_llm(rag_response_en[0],en_text)
+        print("#######################################################")
+        print(llm_response)
+        print("#######################################################")
 
-    # ---------- TTS ----------
-    tts_audio_path = os.path.join(OUTPUT_FOLDER, "tts_output.wav")
-    tts_processor.process_long_text(
-            rag_response_hi, 
-            output_file=tts_audio_path,
-            max_chars=80,
-            add_silence_between_chunks=True
-    )
-    print("6")  # saves Hindi speech
-    print(rag_response_hi)
-    return jsonify({
-        "rag_response_hi": rag_response_hi,
-        "audio_url": f"/output/{os.path.basename(tts_audio_path)}"
-    })
+        # ---------- Translate response back to Hindi ----------
+        rag_response_hi = translate_to_indic(llm_response,"hindi")
+        print("5")
+
+        # ---------- TTS ----------
+        tts_audio_path = os.path.join(OUTPUT_FOLDER, "tts_output.wav")
+        tts_processor.process_long_text(
+                rag_response_hi, 
+                output_file=tts_audio_path,
+                max_chars=80,
+                add_silence_between_chunks=True
+        )
+        print("6")  # saves Hindi speech
+        print(rag_response_hi)
+        
+        return jsonify({
+            "rag_response_hi": rag_response_hi,
+            "audio_url": f"/output/{os.path.basename(tts_audio_path)}"
+        })
+        
+    except Exception as e:
+        print(f"Processing error: {e}")
+        return jsonify({
+            "error": f"Processing failed: {str(e)}",
+            "rag_response_hi": "प्रोसेसिंग में त्रुटि हुई।",
+            "audio_url": None
+        }), 500
 
 
 # ----------------- Serve Uploaded Files -----------------
