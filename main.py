@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify, render_template, send_from_directory
 import os
-from stt import shrutam_transcriber # STT 
+# from stt import shrutam_transcriber # STT 
 from translators import translate_to_en,translate_to_indic  #translators for en and hi
 from classifier import MobileNetV2Predictor                # crop disease classifier
 from rag import CropDiseaseRAG                         # RAG pipeline      
+from stt_conformer import stt
 # from tts import ImprovedTTSProcessor,initialize_tts    
 from llm import call_llm                               #qwen llm
 from tts import tts                                    #tts
@@ -125,7 +126,8 @@ def process():
 
     try:
         # ---------- shrutamSTT ----------
-        hindi_text = shrutam_transcriber(audio_path) 
+        # hindi_text = shrutam_transcriber(audio_path) 
+        hindi_text = stt(audio_path)
         print("##############")
         # print(hindi_text)  
         print("1")
