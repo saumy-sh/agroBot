@@ -156,16 +156,6 @@ Update paths in `main.py`:
 MODEL_PATH = "path/to/your/best_finetuned_model.pth"
 ```
 
-### Language Support
-Modify `translators.py` for additional languages:
-```python
-lang_codes = {
-    "hindi": "hin_Deva",
-    "bengali": "ben_Beng",
-    "tamil": "tam_Taml",
-    # Add more languages
-}
-```
 
 ## 📁 Project Structure
 
@@ -197,7 +187,7 @@ agrobot/
 ### Computer Vision
 - **Architecture**: MobileNetV2
 - **Input**: 224x224 RGB images
-- **Classes**: 18 crop-disease combinations
+- **Classes**: 17 crop-disease combinations
 - **Preprocessing**: Standard ImageNet normalization
 
 ### Translation
@@ -210,10 +200,12 @@ agrobot/
 - **Similarity**: Cosine similarity
 - **Retrieval**: Top-K matching (default: 3)
 
+### LLM
+ - **Model**: Qwen-2.5-Instruct(3M)
 ### TTS (Text-to-Speech)
-- **Model**: Indri-0.1-350M
+- **Model**: Piper python API
 - **Language**: Hindi
-- **Output**: 24kHz WAV files
+- **Output**: 16kHz WAV files
 
 ## 🎯 Usage Examples
 
@@ -249,7 +241,7 @@ agrobot/
 
 ### Performance Optimization
 
-- Use GPU for faster inference
+- Use GPU for faster inference(right now we have kept everything on GPU)
 - Adjust batch sizes based on memory
 - Optimize image preprocessing
 - Cache model embeddings
