@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify, render_template, send_from_directory
 import os
-from stt import shrutam_transcriber # STT and then translation to en
-from translators import translate_to_en,translate_to_indic     
+from stt import shrutam_transcriber # STT 
+from translators import translate_to_en,translate_to_indic  #translators for en and hi
 from classifier import MobileNetV2Predictor                # crop disease classifier
 from rag import CropDiseaseRAG                         # RAG pipeline      
-from tts import ImprovedTTSProcessor,initialize_tts    # back-translation and TTS for hi
-from llm import call_llm
+# from tts import ImprovedTTSProcessor,initialize_tts    
+from llm import call_llm                               #qwen llm
+from tts import tts                                    #tts
 
 # Try to import pydub, but handle if FFmpeg is not available
 try:
@@ -40,12 +41,11 @@ mapping = [
 
 
 
-pipe = initialize_tts()
 predictor = MobileNetV2Predictor(MODEL_PATH)
 
 rag_system = CropDiseaseRAG()
 
-tts_processor = ImprovedTTSProcessor(pipe)
+# tts_processor = ImprovedTTSProcessor(pipe)
 
 print("initialised models")
 app = Flask(__name__)
@@ -175,12 +175,13 @@ def process():
 
         # ---------- TTS ----------
         tts_audio_path = os.path.join(OUTPUT_FOLDER, "tts_output.wav")
-        tts_processor.process_long_text(
-                rag_response_hi, 
-                output_file=tts_audio_path,
-                max_chars=80,
-                add_silence_between_chunks=True
-        )
+        # tts_processor.process_long_text(
+        #         rag_response_hi, 
+        #         output_file=tts_audio_path,
+        #         max_chars=80,
+        #         add_silence_between_chunks=True
+        # )
+        tts(rag_response_hi)
         print("6")  # saves Hindi speech
         print(rag_response_hi)
         

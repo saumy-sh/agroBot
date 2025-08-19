@@ -12,41 +12,58 @@ Our project can be tested by running a kaggle notebook which has all the impleme
 
 ## 🚀 Features
 
-- **Voice-to-Voice Interaction**: Speak in Hindi and get audio responses back
-- **Crop Disease Classification**: AI-powered image analysis using fine-tuned MobileNetV2
+- **Voice-to-Voice Interaction**: Speak in Hindi and get audio responses back in Hindi. This is done keeping in mind the end users will be farmers.
+- **Crop Disease Classification**: AI-powered image analysis using fine-tuned MobileNetV2 - a vision model capable of running on edge devices.
 - **Multilingual Support**: Hindi speech input/output with English processing
-- **Treatment Recommendations**: RAG-based system with comprehensive disease database
+- **Treatment Recommendations**: RAG-based system which geenrates enriched context so that the LLM(Qwen-2.5-Instruct) doesn't hallucinate.
 - **Web Interface**: Easy-to-use browser-based interface
 
 ## 🏗️ System Architecture
 
 ```
-Audio Input (Hindi) → STT → Translation (Hi→En) → Disease Classification (Image) → RAG System → Translation (En→Hi) → TTS → Audio Output (Hindi)
+Audio Input (Hindi) → STT → Translation (Hi→En) → Disease Classification (Image) → RAG System → LLM → Translation (En→Hi) → TTS → Audio Output (Hindi)
 ```
 
 ### Processing Pipeline
 
-1. **Speech-to-Text (STT)**: Converts Hindi speech to text using Shrutam model
+1. **Speech-to-Text (STT)**: Shrutam model converts Hindi speech to text using Shrutam model
 2. **Language Translation**: Translates Hindi text to English using IndicTrans2
 3. **Image Classification**: Analyzes crop images using fine-tuned MobileNetV2
-4. **RAG Processing**: Retrieves relevant information from disease database
-5. **Response Translation**: Converts English response back to Hindi
-6. **Text-to-Speech (TTS)**: Generates Hindi audio response
+4. **RAG Processing**: Retrieves relevant information from disease database using `sentence-transformers/all-MiniLM-L6-v2` for embedding generation and cosine similarity for relevant context generation.
+5. **LLM**: Generates relevant response using generated context from RAG as well as user query using Qwen-2.5-Instruct(3M).
+6. **Response Translation**: Converts English response back to Hindi using IndicTrans2
+7. **Text-to-Speech (TTS)**: Generates Hindi audio response using Piper-TTS.
 
 ## 📋 Prerequisites
 
 - Python 3.11.13
-- PyTorch
-- CUDA (optional, for GPU acceleration)
-- Flask
 - Required model files (see Model Setup section)
-
+Note we currently have tested this for Python==3.11.13 as for higher versions it gives some dependancy errors.
 ## 🛠️ Installation
 
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
 cd agrobot
+```
+
+These commands are specific to Linux Terminal
+Check python version using
+```bash
+python --version
+```
+If the version is not 3.11.13, then follow these steps to download it:
+```bash
+sudo apt update
+sudo apt install python3.11 python3.11-venv python3.11-dev -y
+```
+Create virtual environment:
+```bash
+python3.11 -m venv .agorbot
+```
+Start the virtual enviroment
+```bash
+source .agorbot/bin/activate
 ```
 
 2. **Install dependencies**
@@ -63,15 +80,17 @@ pip install -r requirements.txt
    - Config: `shrutam_model/Branchformer1024/config.yaml`
    - Weights: `shrutam_model/Branchformer1024/model.pth`
 
+You can get these files by downloading the model folder from [this link](https://huggingface.co/bharatgenai/Shrutam-HindiASR-1.0/tree/main). From here download the complete folder.
+
 2. **MobileNetV2 Crop Disease Classifier**
    - Path: `models\best_finetuned_model.pth`
 
-3. **IndicTrans2 Translation Models**
-   - Indic-to-English: `ai4bharat/indictrans2-indic-en-dist-200M`
-   - English-to-Indic: `ai4bharat/indictrans2-en-indic-dist-200M`
 
-4. **TTS Model**
-   - Model: `11mlabs/indri-0.1-350m-tts`
+For translation right now we directly download the model in cache from HuggingFace.
+
+
+3. **TTS Model**
+   - speaker file: `hi_speakers/hi_IN-pratham-medium.onnx`
 
 ## 📊 Database Structure
 
@@ -85,7 +104,7 @@ The system uses a JSON database (`database/disease_database.json`) containing:
   "treatment": "Use resistant hybrids. Apply fungicides..."
 }
 ```
-We use sentence transformer(sentence-transformers/all-MiniLM-L6-v2) to convert it to embedding.
+We use sentence transformer(sentence-transformers/all-MiniLM-L6-v2) to convert it to embedding and then use cosine similarity for relevant context generation.
 
 ### Supported Crops & Diseases
 
