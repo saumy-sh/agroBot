@@ -8,7 +8,7 @@ from stt_conformer import stt
 # from tts import ImprovedTTSProcessor,initialize_tts    
 from llm import call_llm                               #qwen llm
 from tts import tts                                    #tts
-
+# from rag_test import answer_queries
 # Try to import pydub, but handle if FFmpeg is not available
 try:
     from pydub import AudioSegment
@@ -153,7 +153,7 @@ def process():
             crop_disease: {predicted_class}
         """
 
-        # ---------- RAG ----------
+        # # ---------- RAG ----------
         rag_response_en = rag_system.search(query, top_k=3)
         print(rag_response_en)
         clean_response = [
@@ -168,6 +168,7 @@ def process():
         print("4")
 
         llm_response = call_llm(clean_response[0],en_text)
+        # llm_response = answer_queries(predicted_class)
         print("#######################################################")
         print(llm_response)
         print("#######################################################")

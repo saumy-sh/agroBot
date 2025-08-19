@@ -5,3 +5,5 @@ installation.txt
 models
 .agrobot
 .venv
+.test
+chroma
