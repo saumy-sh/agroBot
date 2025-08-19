@@ -243,8 +243,6 @@ agrobot/
 
 - Use GPU for faster inference(right now we have kept everything on GPU)
 - Adjust batch sizes based on memory
-- Optimize image preprocessing
-- Cache model embeddings
 
 ## 📈 Future Enhancements
 
@@ -274,6 +272,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **MobileNetV2**: Efficient computer vision
 - **ESPnet**: Speech processing toolkit
 - **Hugging Face**: Model hosting and transformers
+- **Qwen2.5-Instruct**: Open source LLM
 
 ## 📞 Support
 
