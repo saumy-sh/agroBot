@@ -47,19 +47,9 @@ git clone <repository-url>
 cd agrobot
 ```
 
-These commands are specific to Linux Terminal
-Check python version using
-```bash
-python --version
-```
-If the version is not 3.11.13, then follow these steps to download it:
-```bash
-sudo apt update
-sudo apt install python3.11 python3.11-venv python3.11-dev -y
-```
 Create virtual environment:
 ```bash
-python3.11 -m venv .agorbot
+python -m venv .agorbot
 ```
 Start the virtual enviroment
 ```bash
@@ -76,11 +66,10 @@ pip install -r requirements.txt
 
 ### Required Models
 
-1. **Shrutam STT Model**
-   - Config: `shrutam_model/Branchformer1024/config.yaml`
-   - Weights: `shrutam_model/Branchformer1024/model.pth`
+1. **Conformer STT Model**
+   - Model: `models/indicconformer_stt_hi_hybrid_rnnt_large.nemo`
+   
 
-You can get these files by downloading the model folder from [this link](https://huggingface.co/bharatgenai/Shrutam-HindiASR-1.0/tree/main). From here download the complete folder.
 
 2. **MobileNetV2 Crop Disease Classifier**
    - Path: `models\best_finetuned_model.pth`
@@ -153,7 +142,7 @@ Response:
 ### Model Paths
 Update paths in `main.py`:
 ```python
-MODEL_PATH = "path/to/your/best_finetuned_model.pth"
+MODEL_PATH = "models/best_finetuned_model.pth"
 ```
 
 
@@ -176,11 +165,11 @@ agrobot/
 ├── output/                # Generated audio files
 └── requirements.txt       # Python dependencies
 ```
-
+This project stucture is missing some new changes but some new directories are also present that would be visible once you clone the repo.
 ## 🔬 Technical Components
 
 ### STT (Speech-to-Text)
-- **Model**: Shrutam (ESPnet-based)
+- **Model**: Conformer (Transformer-convolution based)
 - **Language**: Hindi
 - **Format**: WAV, 16kHz sampling rate
 
@@ -267,10 +256,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- **Shrutam**: Hindi STT model
+- **Conformer**: Hindi STT model
 - **IndicTrans2**: Multilingual translation
 - **MobileNetV2**: Efficient computer vision
-- **ESPnet**: Speech processing toolkit
 - **Hugging Face**: Model hosting and transformers
 - **Qwen2.5-Instruct**: Open source LLM
 

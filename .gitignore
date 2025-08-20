@@ -2,8 +2,8 @@ uploads
 output
 __pycache__
 installation.txt
-models
 .agrobot
 .venv
 .test
 chroma
+models/*.nemo
