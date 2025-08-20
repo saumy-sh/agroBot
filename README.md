@@ -75,11 +75,11 @@ pip install -r requirements.txt
    - Path: `models\best_finetuned_model.pth`
 
 
-For translation right now we directly download the model in cache from HuggingFace.
-
-
 3. **TTS Model**
    - speaker file: `hi_speakers/hi_IN-pratham-medium.onnx`
+
+
+All models and speaker files can be downloaded from this [drive link](https://drive.google.com/drive/folders/1zgqHxFxGUH78LidO__riTl__JMk5FpuY?usp=sharing). After downloading them from here keep the model files inside models folder from the cloned repo and the speaker files inside hi_speakers folder.
 
 ## 📊 Database Structure
 
