@@ -262,11 +262,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **MobileNetV2**: Efficient computer vision
 - **Hugging Face**: Model hosting and transformers
 - **Qwen2.5-Instruct**: Open source LLM
-
-## 📞 Support
-
-For questions and support, please open an issue in the GitHub repository.
-
 ---
 
 **Note**: Ensure you have the required model files and proper hardware setup before running the application. 
