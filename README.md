@@ -5,6 +5,7 @@ AgroBot is basically an intelligent agricultural assistant that helps farmers id
 # Project Testing
 Our project can be tested by running a kaggle notebook which has all the implementations. The link is here:
 [Notebook implementation](https://www.kaggle.com/code/zoomershredder/chatbot-agrobot)
+If this doesn't work then follow the steps in Installation to clone the repo and setup all model files provided in drive link below.
 
 
 ## Architecture
